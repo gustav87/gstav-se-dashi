@@ -1,18 +1,12 @@
-import './style.css'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.ts'
+import "./style.css";
+import typescriptLogo from "./assets/typescript.svg";
+import viteLogo from "./assets/vite.svg";
+import heroImg from "./assets/hero.png";
 
-let contactData = {
-  name: 'a',
-  email: 'b',
-  message: 'c'
-};
+const formEndpoint = "https://backend.gstav.se/contact-form";
+let responseMessage = "";
 
-const responseMessage = '';
-
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <section id="center">
   <div class="hero">
     <img src="${heroImg}" class="base" width="170" height="179">
@@ -21,12 +15,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </div>
   <div>
     <h1>Gustav Andersson</h1>
-    <p>Welcome to my website</p>
+    <p>Welcome to my humble abode</p>
   </div>
-  <button id="counter" type="button" class="counter"></button>
 </section>
-
-<div class="ticks"></div>
 
 <section class="section-area">
   <div id="docs">
@@ -41,7 +32,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div id="social">
     <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
     <h2>Connect with me</h2>
-    <p>Check out my github or send me an e-mail.</p>
+    <p>Check out my GitHub, find me on Discord, or send me an e-mail.</p>
     <ul>
       <li>
         <a href="https://github.com/gustav87" target="_blank">
@@ -50,7 +41,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         </a>
       </li>
       <li>
-        <a href="https://discord.gg/m79GnKMBA8" target="_blank">
+        <a href="https://discord.gg/7Bw2rwQ8xh" target="_blank">
         <img src="https://cdn.simpleicons.org/discord/7289da" height="20">
         Discord
         </a>
@@ -73,9 +64,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         class="contact-input"
         style="margin-bottom: 10px;"
         type="text"
-        placeholder="Name"
         id="name"
-        value=${contactData.name}
       />
 
       <label for="email">Email</label>
@@ -83,9 +72,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         class="contact-input"
         style="margin-bottom: 10px;"
         type="email"
-        placeholder="Email"
         id="email"
-        value=${contactData.email}
       />
 
       <label for="message">Message</label>
@@ -93,19 +80,42 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         class="contact-input"
         style="margin-bottom: 15px; resize: none;"
         rows="10"
-        placeholder="Message"
         id="message"
-      >${contactData.message}</textarea>
+      ></textarea>
 
       <div style="display: flex; gap: 10px;">
-        <input type="submit" value="Send Message" class={submitButtonClasses} onClick={handleSubmit} />
+        <input type="submit" id="send" value="Send Message" />
       </div>
     </div>
     <div>${responseMessage}</div>
   </div>
 </section>
-
 <section id="spacer"></section>
-`
+`;
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+async function sendData(event: Event) {
+  event.preventDefault();
+  const nameElement = document.querySelector("#name") as HTMLInputElement;
+  const emailElement = document.querySelector("#email") as HTMLInputElement;
+  const messageElement = document.querySelector("#message") as HTMLInputElement;
+
+  const formData = new FormData();
+  formData.append("name", nameElement.value);
+  formData.append("email", emailElement.value);
+  formData.append("message", messageElement.value);
+
+  try {
+    const response = await fetch(formEndpoint, {
+      method: "POST",
+      body: formData,
+    });
+    const res = await response.json();
+    console.log(res);
+    responseMessage = res.message;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const send = document.querySelector("#send");
+send!.addEventListener("click", sendData);
